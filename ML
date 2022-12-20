@@ -257,3 +257,487 @@ print(paste("logistic crossvalidation error",cross_err_lg))
 
 
 ```
+
+
+**10.3**
+
+"If extremely influential outlying cases are detected in a data set, simply
+discard these cases from the data set." \n
+
+we need to examine the data given if the measurement error varies high we can discard the outliers from the dataset and if the outlying data points exhibits variance according to the population the data can be left as in the dataset as these are also true outliers.
+
+**10.10**
+**(a)**
+```{r}
+X_1= c(305657,328476,317164,366745,265518,301995,269334,267631,296350,277223,269189,277133,282892,306639,328405,321773,272319,293880,300867,296872,245674,211944,227996,248328,249894,302660,273848,245743,267673,256506,271854,293225,269121,322812,252225,261365,287645,289666,270051,265239,352466,426908,369989,472476,414102,302507,382686,442782,322303,290455,411750,292087)
+X_2= c(7.17,6.2,4.61,7.02,8.61,6.88,7.23,6.27,6.49,6.37,7.05,6.34,6.94,8.56,6.71,5.82,6.82,8.38,7.72,7.67,7.72,6.45,7.22,8.5,8.08,7.26,7.39,8.12,6.75,7.79,7.89,9.01,8.01,7.21,7.85,6.14,6.76,7.92,8.19,7.55,6.94,7.25,9.65,8.2,8.02,6.72,7.23,7.61,7.39,7.99,7.83,7.77)
+X_3= c(0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0)
+Y= c(4264,4496,4317,4292,4945,4325,4110,4111,4161,4560,4401,4251,4222,4063,4343,4833,4453,4195,4394,4099,4816,4867,4114,4314,4289,4269,4347,4178,4333,4226,4121,3998,4475,4545,4016,4207,4148,4562,4146,4555,4365,4471,5045,4469,4408,4219,4211,4993,4309,4499,4186,4342)
+
+#pairs(X_1, pch = 19)
+groceries=read.csv(file="C:/Users/ual-laptop/Documents/R Mahee/groceries.csv")
+resid.lm=lm(Y~X_1+X_2+X_3)
+rsd.lm=round(rstudent(resid.lm), 3)
+rsd.lm
+n=52
+p=4
+ifelse(rsd.lm > qt(1-0.95/2/n,n-p-1), "outlier", "Non-outlier") 
+
+```
+By Bonferroni outlier test we can see that the outliers cannot be defind from the observed values
+
+**(b)**
+```{r}
+hat.lm=round(hatvalues(resid.lm), 3)
+mean(hat.lm)
+m=mean(hat.lm)
+hat.lm
+ifelse(hat.lm > 2*p/n, "outlier", "Non-outlier")
+```
+From the diagonal elements of hat matrix it can be observed the the mean leverage is `r m` the cases are termed as outliers if the value is twice the mean leverage value they are considered as outliers by the rule of thumb in the textbook. Here the cases are 3, 5, 16, 21, 22, 43, 44, and 48.
+
+**(d)**
+```{r}
+a= cbind(
+  "DFFITS"  = round(dffits(resid.lm), 4),
+  "b0" = round(dfbetas( resid.lm)[,1], 4),
+  "b1" = round(dfbetas( resid.lm)[,2], 4),
+  "b2" = round(dfbetas( resid.lm)[,3], 4),
+  "b3" = round(dfbetas( resid.lm)[,3], 4),
+  "Cook's D" = round(cooks.distance( resid.lm), 4))
+a[c(16,22,43,48,10,32,38,40),]
+#DFFITS  = round(dffits(resid.lm), 4)
+#DFBETA0 = round(dfbetas( resid.lm)[,1], 4)
+```
+From DFFITS 16,43,10,32 indexes are outliers.
+From Cooks Distance none of them are outliers.
+From DFBETAS 16,43,10,32 are outliers.
+
+
+**(f)**
+```{r}
+cooks_distance = cooks.distance(resid.lm)
+
+pfs = pf(cooks_distance, 4,n-4)
+plot(cooks_distance)
+points(cooks_distance[pfs>1/2], col = "red")
+#a= cbind(
+#a[c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52),]
+
+```
+
+10.12
+**(a)**
+```{r}
+Total_x4<-c(123000 ,  104079,   39998,   57112,   60000,  101385,   31300,  248172,  215000,  251015,  291264,  207549,   82000,  359665,  265500,  299000,  189258,  366013,  349930,   85335,  235932,  130000,   40500,   40500,   45959,  120000,   81243,  153947,   97321,  276099,   90000,  184000,  184718,   96000,  106350,  135512,  180000,  315000,   42500,   30005,   60000,   73521,   50000,   50724,   31750,  168000,   70000,   27000,  129614,  129614,  130000,  209000,  220000,   60000,  110000,  101206,  288847,  105000,  276425,   33000,  210000,  240000,  281552,  421000,  484290,  234493,  230675,  296966,   32000,   38533,  109912,  236000,  243338,  122183,  128268,   72000,   43404,   59443,  254700,  434746,  201930)
+Vacancy_x3<-c( 0.14,0.27,0.00,0.05,0.07,0.24,0.19,0.60,0.00,0.03,0.08,0.03,0.00,0.04,0.03,0.00,0.14,0.12,0.00,0.03,0.13,0.00,0.05,0.00,0.00,0.33,0.05,0.06,0.22,0.09,0.00,0.00,0.03,0.04,0.04,0.10,0.21,0.03,0.04,0.00,0.00,0.00,0.00,0.00,0.16,0.00,0.00,0.00,0.03,0.00,0.00,0.00,0.57,0.27,0.00,0.05,0.00,0.14,0.05,0.06,0.73,0.22,0.00,0.00,0.04,0.00,0.03,0.08,0.00,0.03,0.02,0.23,0.05,0.04,0.00,0.00,0.00,0.08,0.14,0.03,0.03)
+Expenses_x2<-c(5.02 ,8.19,3.00, 10.70,8.97,9.45,8.00,6.62,6.20, 11.78, 14.62, 11.55,9.63, 12.99, 12.01, 12.01,7.99, 10.33, 10.67,9.45, 12.65, 12.08, 10.52,9.47, 11.62,5.00,9.89, 11.13,7.96, 10.73,7.95,9.10, 12.05,8.43, 10.60, 10.55,5.50,8.53,9.04,8.20,6.13,8.32,4.00, 10.10,5.25, 11.62,5.31,5.75, 12.46, 12.75, 12.75, 11.38,5.99, 11.37, 10.38, 10.77, 11.30,7.06, 12.10, 10.04,4.99,7.33, 12.11, 12.86, 12.70, 11.58, 11.58, 12.97,4.82,9.75, 10.36,8.13, 13.23, 10.57, 11.22, 10.34, 10.67,8.60, 11.97, 11.27, 12.68)
+Age_x1<-c(1,14,16,4,11,15,2,1,1,8,12,2,2,13,2,1,1,12,16,3,6,3,3,3,14,1,15,16,2,16,2,3,3,16,16,13,1,14,3,15,1,15,1,15,3,3,4,1,4,4,2,2,1,2,3,15,17,1,14,2,1,0,18,16,13,20,18,16,1,2,16,1,15,4,20,3,3,18,15,11,14)
+rentals_y<-c(13.500 ,12.000,10.500,15.000,14.000,10.500,14.000,16.500,17.500,16.500,17.000,16.500,16.000,16.500,17.225,17.000,16.000,14.625,14.500,14.500,16.500,16.500,15.000,15.000,13.000,12.500,14.000,13.750,14.000,15.000,13.750,15.625,15.625,13.000,14.000,15.250,16.250,13.000,14.500,11.500,14.250,15.500,12.000,14.250,14.000,16.500,14.500,15.500,16.750,16.750,16.750,16.750,17.000,16.000,14.500,15.000,15.000,16.000,15.500,15.250,16.500,19.250,17.750,18.750,19.250,14.000,14.000,18.000,13.750,15.000,15.500,15.900,15.250,15.500,14.750,15.000,14.500,13.500,15.000,15.250,14.500)
+model_com=lm(rentals_y~Age_x1+Expenses_x2+Vacancy_x3+Total_x4)
+rsd.lm1=round(rstudent(model_com), 3)
+rsd.lm1
+n=81
+p=5
+qt(1-0.01/2/n,n-p-1)
+ifelse(rsd.lm1 > qt(1-0.01/2/n,n-p-1), "outlier", "Non-outlier") 
+
+```
+By Bonferroni outlier test we can see that the outliers cannot be defined from the observed values.
+
+**(b)**
+```{r}
+hat.lm1=round(hatvalues(model_com), 3)
+mean(hat.lm1)
+m=mean(hat.lm1)
+hat.lm1
+ifelse(hat.lm1 > 2*p/n, "outlier", "Non-outlier")
+```
+From the diagonal elements of hat matrix it can be observed the the mean leverage is `r m` the cases are termed as outliers if the value is twice the mean leverage value they are considered as outliers by the rule of thumb in the textbook. Here the cases are 3, 8, 53, 61, 65.
+
+**(c)**
+```{r}
+library(MASS)
+commercials=read.csv(file="C:/Users/ual-laptop/Documents/R Mahee/commercials.csv")
+commercials_df <- as.data.frame(commercials)
+commercials_model=lm(commercials_df[,5]~commercials_df[,1]+commercials_df[,2]+commercials_df[,3]+commercials_df[,4])
+
+xnew <- c(10,12.00,0.05,350000)
+#commercials_model$model
+data1=cbind(Age_x1,Expenses_x2,Vacancy_x3,Total_x4)
+xold<-as.matrix(data1)
+#xold <- as.matrix(commercials_model$model[,setdiff(names(commercials_model$model),c("rental.rates"))])
+hnewnew <- t(xnew)%*%solve(crossprod(xold))%*%xnew
+#model=commercials_model$model
+#df = subset(model, select = -c("Y") )
+#df
+hnewnew
+```
+`r hnewnew` is well within the range of the other diagonal entries of $\bf{H}$. It's prediction would not involve hidden extrapolation.
+
+**(d)**
+```{r}
+a= cbind(
+  "DFFITS"  = round(dffits(model_com), 4),
+  "b0" = round(dfbetas(model_com)[,1], 4),
+  "b1" = round(dfbetas( model_com)[,2], 4),
+  "b2" = round(dfbetas(model_com)[,3], 4),
+  "b3" = round(dfbetas( model_com)[,3], 4),
+  "Cook's D" = round(cooks.distance(model_com), 4))
+a[c(61,8,3,53,6,62),]
+
+```
+From DFFITS 61,53,6,62 indexes are outliers.
+From Cooks Distance none of them are outliers.
+From DFBETAS 61,3,53,6,62 are outliers.
+
+
+**(f)**
+```{r}
+cooks_distance = cooks.distance(model_com)
+pfs = pf(cooks_distance, p,n-p)
+plot(cooks_distance)
+points(cooks_distance[pfs>1/2], col = "red")
+```
+
+**10.16**
+**(a)**
+```{r}
+groceries=read.csv(file="C:/Users/ual-laptop/Documents/R Mahee/groceries.csv")
+groceries_df <- as.data.frame(groceries)
+pairs(groceries_df)
+cor_mat=cor(groceries_df)
+cor_mat
+```   
+We can see that there is no issue of multicollinearity from correlation and scatterplot matrix
+
+**(b)**
+```{r}
+library(car)
+round(vif(resid.lm), 4)
+```
+Since all three VIF don’t exceed 10, which indicates no serious multicollinearity problems exist.
+
+**10.18**
+**(b)**
+```{r}
+library(car)
+round(vif(model_com), 4)
+```
+Since all three VIF don’t exceed 10, which indicates no serious multicollinearity problems exist.
+
+10.20
+
+**(a)**&&**(b)**
+```{r}
+X1=c(45,30,11,30,39,42,17,63,25,32,37,29,26,38,38,25,27,37,34)
+X2=c(36,28,16,46,76,78,24,80,12,27,37,34,32,45,99,38,51,32,40)
+X3=c(45,40,42,40,43,27,36,42,52,35,55,47,28,30,26,47,44,54,36)
+Y=c(49,55,85,32,26,28,95,26,74,37,31,49,38,41,12,44,29,40,31)
+X1X2=X1*X2
+lungs_model=lm(Y~X1+X2+X1X2)
+res.lm=lungs_model$residuals
+fit.lm=lungs_model$fitted.values
+plot(fit.lm,res.lm)
+abline(h=0)
+
+npplot =(lungs_model$residuals)
+qqnorm(npplot,
+       ylab="Standardized Residuals",
+       xlab="Normal Scores",
+       main="residuals") 
+qqline(npplot)
+```
+The residuals are randomly scatterred over X axis.\n
+
+However it doesn’t seem to confirm to a normal distribution as shown with the heavily tail trend.
+
+**(C)**
+```{r}
+round(vif(lungs_model), 4)
+```
+Since all three VIF  exceed 10, which indicates there  exist serious multicollinearity problem.
+
+**(e)**
+```{r}
+h_diag = hatvalues(lungs_model)
+h_diag[h_diag>2*p/n]
+```
+
+**((f)**
+```{r}
+a= cbind(
+  "DFFITS"  = round(dffits(lungs_model), 4),
+  "b0" = round(dfbetas(lungs_model)[,1], 4),
+  "b1" = round(dfbetas( lungs_model)[,2], 4),
+  "b2" = round(dfbetas(model_com)[,3], 4),
+  "b3" = round(dfbetas( lungs_model)[,3], 4),
+  "Cook's D" = round(cooks.distance(lungs_model), 4))
+a[c(3,8,15,7),]
+```
+
+**10.21**
+**(a)**
+```{r}
+Y=c(  132.0,   53.0,   50.0,   82.0,  110.0,  100.0,   68.0,   92.0,   60.0,   94.0,  105.0,   98.0,  112.0,  125.0,  108.0,   30.0,  111.0,  130.0,   94.0,  130.0,   59.0,   38.0,   65.0,   85.0,  140.0,   80.0,   43.0,   75.0,   41.0,  120.0,   52.0,   73.0,   57.0)
+X1=c(  0.71,  1.48,  2.21,  1.43,  0.68,  0.76,  1.12,  0.92,  1.55,  0.94,  1.00,  1.07,  0.70,  0.71,  1.00,  2.52,  1.13,  1.12,  1.38,  1.12,  0.97,  1.61,  1.58,  1.40,  0.68,  1.20,  2.10,  1.36,  1.50,  0.82,  1.53,  1.58,  1.37)
+X2=c(  38.0,  78.0,  69.0,  70.0,  45.0,  65.0,  76.0,  61.0,  68.0,  64.0,  66.0,  49.0,  43.0,  42.0,  66.0,  78.0,  35.0,  34.0,  35.0,  16.0,  54.0,  73.0,  66.0,  31.0,  32.0,  21.0,  73.0,  78.0,  58.0,  62.0,  70.0,  63.0,  68.0)
+X3=c(  71.0,  69.0,  85.0, 100.0,  59.0,  73.0,  63.0,  81.0,  74.0,  87.0,  79.0,  93.0,  60.0,  70.0,  83.0,  70.0,  73.0,  85.0,  68.0,  65.0,  53.0,  50.0,  74.0,  67.0,  80.0,  67.0,  72.0,  67.0,  60.0, 107.0,  75.0,  62.0,  52.0)
+kidney_model=lm(Y~X1+X2+X3)
+round(vif(kidney_model), 4)
+
+```
+Since all three VIF don’t exceed 10, which indicates no serious multicollinearity problems exist.
+
+**(b)**
+```{r}
+res.lm=kidney_model$residuals
+fit.lm=kidney_model$fitted.values
+plot(fit.lm,res.lm)
+npplot =(kidney_model$residuals)
+qqnorm(npplot,
+       ylab="Standardized Residuals",
+       xlab="Normal Scores",
+       main="residuals") 
+qqline(npplot)
+```
+**10.22**
+**(a)**
+```{r}
+kidney_theory=lm(log(Y)~log(X1)+log(140-X2)+log(X3))
+kidney_theory
+```
+The fitted regression function is Y~i~  = −2.0427 − .7120 log(X1) + .7474 log(140-X2) + .7574log(X3)
+
+**(b)**
+```{r}
+Y_new = log(Y)
+X1_new = log(X1)
+X2_new = log(140-X2)
+X3_new = log(X3)
+m5 = lm(Y_new ~ X1_new+ X2_new+ X3_new)
+resids = m5$residuals
+plot(Y_new, resids)
+abline(h=0)
+plot(X1_new, resids)
+abline(h=0)
+plot(X2_new, resids)
+abline(h=0)
+plot(X3_new, resids)
+abline(h=0)
+qqnorm(resids)
+qqline(resids)
+```
+The above plots show that the residuals are randomly scatterred over X axis and the residual quantiles are
+aligned with the theoritical quantiles indicating no departure from normality.
+**(c)**
+```{r}
+round(vif(kidney_theory), 4)
+
+```
+
+Since all three VIF don’t exceed 10, which indicates no serious multicollinearity problems exist.
+
+**(d)**
+```{r}
+rsd.lm2=round(rstudent(kidney_theory), 3)
+rsd.lm2
+n=33
+p=4
+qt(1-0.10/2/n,n-p-1)
+ifelse(rsd.lm1 > qt(1-0.1/2/n,n-p-1), "outlier", "Non-outlier")
+```
+By Bonferroni outlier test we can see that the outliers cannot be defind from the observed values
+
+**(e)**
+```{r}
+hat.lm1=round(hatvalues(kidney_theory), 3)
+mean(hat.lm1)
+m=mean(hat.lm1)
+hat.lm1
+
+ifelse(hat.lm1 > 2*p/n, "outlier", "Non-outlier")
+```
+From above we can see that values are less than t-crit . henc ewe can conclude that there are no outliers.
+
+**(f)**
+```{r}
+a= cbind(
+  "DFFITS"  = round(dffits(kidney_theory), 4),
+  "b0" = round(dfbetas(kidney_theory)[,1], 4),
+  "b1" = round(dfbetas( kidney_theory)[,2], 4),
+  "b2" = round(dfbetas(kidney_theory)[,3], 4),
+  "b3" = round(dfbetas( kidney_theory)[,3], 4),
+  "Cook's D" = round(cooks.distance(kidney_theory), 4))
+a[c(28,29),]
+```
+**11.6**
+**(a)**
+```{r}
+X=c(16.0,14.0,22.0,10.0,14.0,17.0,10.0,13.0,19.0,12.0,18.0,11.0)
+Y=c(   77.0,   70.0,   85.0,   50.0,   62.0,   70.0,   55.0,   63.0,   88.0,   57.0,   81.0,   51.0)
+comp_model=lm(Y~X)
+comp_model
+resid_model=resid(comp_model)
+plot(resid_model ~ X, ylab="Residual", xlab="Responses in completing a lesson", 
+     main="Residual plot against X")
+abline(h=0)
+```
+The regression function is Y~i~=19.473 + 3.269  X. The residual plot seems to show an increase in residual variance as X increases. The constancy of variance assumption might not be met.
+
+**(b)**
+```{r}
+com_fit=fitted(comp_model)
+com_fit
+com_median=median(com_fit)
+com_median
+group1=com_fit[1:6]
+group2=com_fit[7:12]
+n1=length(group1)
+n2=length(group2)
+
+
+require(lawstat)
+
+BF.htest = levene.test( resid_model[order(com_fit)],group=c(rep(1,n1),rep(2,n2)),location="median" )
+BF.htest
+```
+Decision Rule: the null hypothesis will be rejected if the resulting p-value is < 0.05($\alpha$).
+With a p-value of 0.05087, we cannot reject the null. This suggests the conclusion of the true difference in means equaling to 0 and the error term have consistent variance.
+
+**(c)**
+```{r}
+plot(X,abs(resid_model),xlab="number of responses")
+
+```
+**(d)**
+```{r}
+wts= 1/fitted(lm(abs(residuals(comp_model)) ~ X))^2
+comp_model2 = lm(Y ~ X, weights=wts)
+comp_model2
+com_fit2=fitted(comp_model2)
+weights=1/(com_fit2)^2
+sort(weights)
+```
+
+Estimated standard deviation function is Y~i~= 17.301 + 3.421. we can see that 7th case receives the largest weight and 3rd recieves smallest weight.
+
+**(e)**
+```{r}
+comp_model3=lm(Y~X, weights = weights)
+comp_model3
+```
+**(f)**
+```{r}
+print(summary(comp_model)$coefficients[,2])
+print(summary(comp_model2)$coefficients[,2])
+
+```
+From the model it can be seen that weighted least squares estimates are $\beta0=17.752$ and $\beta1=3.388$.
+Yes the estimates are almost similar to the ordinary least squares in part a.
+
+**(11.7)**
+**(a)**
+```{r}
+y=c(28.0,75.0,37.0,53.0,22.0,58.0,40.0,96.0,46.0,52.0,30.0,69.0)
+x=c(200.0,400.0,300.0,400.0,200.0,300.0,300.0,400.0,200.0,400.0,200.0,300.0)
+machine_model=lm(y~x)
+machine_model
+resid_machine=resid(machine_model)
+plot(resid_machine ~ x, ylab="Residual", xlab="Speed Setting of Machine ", 
+     main="Residual plot against X")
+abline(h=0)
+```
+The linear regression function is Y~i~ = -5.7500 + 0.1875x. The residual plot seems to show an increase in residual variance as X increases. The constancy of variance assumption might not be met.
+
+**(b)**
+```{r}
+com_fit=fitted(machine_model)
+com_fit
+com_median=median(com_fit)
+com_median
+group1=com_fit[1:6]
+n1=length(group1)
+n2=length(group2)
+
+group2=com_fit[7:12]
+require(lawstat)
+
+BF.htest = levene.test( resid_machine[order(com_fit)],group=c(rep(1,n1),rep(2,n2)),location="median" )
+BF.htest
+```
+Decision Rule: the null hypothesis will be rejected if the resulting p-value is < 0.1($\alpha$).
+With a p-value of 0.08312, we can reject the null. This suggests the conclusion of the true difference in means equaling to non zero and the error term have non consistent variance.
+
+**(d)**
+```{r}
+wts= 1/fitted(lm(abs(residuals(machine_model)) ~ x))^2
+comp_model2 = lm(y ~ x, weights=wts)
+comp_model2
+com_fit2=fitted(comp_model2)
+weights=1/(com_fit2)^2
+sort(weights)
+```
+**(e)**
+```{r}
+comp_model3=lm(y~x, weights = weights)
+comp_model3
+```
+
+The intercept is a little smaller (or more negative) than the ordinary least squares estimate, but the slope is almost the same. It’s not a huge difference.
+
+**(f)**
+```{r}
+print(summary(machine_model)$coefficients[,2])
+print(summary(comp_model3)$coefficients[,2])
+
+```
+**11.25**
+**(a)**
+```{r}
+Y=c(   49.2,   48.1,   48.0,   49.6,   47.0,   51.5,   51.7,   50.4,   51.2,   48.4,   51.1,   51.5,   50.3,   48.9,   48.7,   48.6,   47.0,   48.0,   46.4,   46.2,   43.2,   42.6,   42.1,   43.9,   40.5)
+X11=c( 6.0, 6.0, 6.0, 6.0, 6.0, 8.0, 8.0, 8.0, 8.0, 8.0,10.0,10.0,10.0,10.0,10.0,12.0,12.0,12.0,12.0,12.0,14.0,14.0,14.0,14.0,14.0)
+X22=c(20.0,21.0,22.0,23.0,24.0,20.0,21.0,22.0,23.0,24.0,20.0,21.0,22.0,23.0,24.0,20.0,21.0,22.0,23.0,24.0,20.0,21.0,22.0,23.0,24.0)
+x1 = X11 - mean(X11)
+X_sq = x1^2
+machine_model = lm(Y~X11+X22+X_sq)
+machine_model
+```
+The poly regression function is Y~i~=69.3869 -0.7620X1 -0.5300X2 -0.2929X3
+
+**(b)**
+```{r}
+X1= seq(min(X11),max(X11),length = 50)
+x1 = X1 - mean(X1)
+X2 = seq(min(X22),max(X22),length = 50)
+y = matrix(0,50,50)
+for (i in 1:50){
+ for (j in 1:50)
+   {
+   y[i,j] = predict(machine_model,data.frame(X11=x1[i],X_sq = x1[i]^2,X22=X2[j]))
+}
+ }
+filled.contour( x=X1, y=X2, z=y,color.palette=terrain.colors,xlab="X1", ylab="X2")
+```
+**(c)**
+```{r}
+machine_m= loess(Y~X11+X22,span = 9/25,degree=1)
+X1 = seq(min(X11),max(X11),length = 9)
+#x1_grid = X1_grid - mean(X1_grid)
+X2 = seq(min(X22),max(X22),length = 9)
+y = matrix(0,9,9)
+for (i in 1:9)
+{
+for (j in 1:9)
+{
+y[i,j] = predict(machine_m,data.frame(X11=X1[i],X22=X2[j]))
+}
+}
+```
+
+**(d)**
+```{r}
+filled.contour( x=X1, y=X2, z=y,color.palette=terrain.colors,xlab="X1", ylab="X2")
+
+```
+We can observe that two countours are rational to each other other than that from the above two graphs we can conclude that in the countour the Y follows downwards parabloa i.e first reaches max then decrease to min with X2. Which is vice versa to the first countour.
